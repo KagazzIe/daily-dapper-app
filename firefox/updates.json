@@ -1,7 +1,7 @@
 {
   "addons": {
     "daily-dapper@local": {
-      "updates": [{ "version": "1.0.0.41", "update_link": "https://kagazzie.github.io/daily-dapper-app/firefox/daily-dapper-1.0.0.41.xpi" }]
+      "updates": [{ "version": "1.0.0.51", "update_link": "https://kagazzie.github.io/daily-dapper-app/firefox/daily-dapper-1.0.0.51.xpi" }]
     }
   }
 }
