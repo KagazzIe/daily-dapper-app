@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daily Dapper Settings</title>
+  <link rel="stylesheet" href="app.css">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Dapper">
+  <meta name="theme-color" content="#1f3a68">
+  <link rel="icon" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.png">
+</head>
+<body>
+<div class="wrap settings">
+  <header>
+    <div>
+      <p class="web-only" style="margin:0 0 8px"><a href="index.html">← Back to today</a></p>
+      <h1>Settings</h1>
+      <div class="sub" id="status"></div>
+    </div>
+  </header>
+
+  <div class="card">
+    <h2>Sync with GitHub</h2>
+    <p class="hint" style="margin:0">Your routine, check-offs and settings are saved as files in a private GitHub repo,
+      so the extension and the phone website show the same day. Enter the same two values on each device.</p>
+    <label class="field">Data repo (owner/name)
+      <input id="githubRepo" type="text" spellcheck="false" placeholder="KagazzIe/daily-dapper">
+    </label>
+    <label class="field">Access token
+      <input id="githubToken" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+    </label>
+    <p class="hint" style="margin:0">Create a <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">fine-grained token</a>:
+      Repository access → <em>Only select repositories</em> → your data repo; Permissions → <em>Contents: Read and write</em>.
+      It's stored only on this device.</p>
+    <div class="row">
+      <button id="connect" class="primary">Connect</button>
+      <button id="sync-now">Sync now</button>
+      <span id="sync-msg" class="hint"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Reminders</h2>
+    <p class="hint" style="margin:0">Firefox on your computer shows these as notifications, only if there are steps left.
+      <span class="web-only">This website can't send notifications, but the times sync to the extension.</span></p>
+    <label class="chk"><input id="notifications" type="checkbox"> Remind me</label>
+    <div class="row">
+      <label class="field">Morning reminder<input id="amTime" type="time"></label>
+      <label class="field">Evening reminder<input id="pmTime" type="time"></label>
+    </div>
+    <label class="chk"><input id="nudge" type="checkbox"> Remind me again if the evening steps still aren't done</label>
+    <div class="row">
+      <label class="field">Second evening reminder<input id="nudgeTime" type="time"></label>
+    </div>
+    <p class="hint" style="margin:0">The day rolls over at 4am, so a late evening routine still counts for the day before.</p>
+    <div class="row">
+      <button id="save" class="primary">Save</button>
+      <button id="test" class="ext-only">Send a test notification</button>
+      <span id="saved" class="hint"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Streak</h2>
+    <p class="hint" style="margin:0">A streak day is one where every required step was done (optional steps, like the
+      Wednesday mask, don't count). One missed day per week (Monday to Sunday) is a grace day: it doesn't break the
+      streak or add to it. A second miss in the same week starts over.</p>
+    <div id="streakInfo"></div>
+  </div>
+</div>
+<script src="web-shim.js"></script>
+<script src="shared.js"></script>
+<script src="github.js"></script>
+<script src="store.js"></script>
+<script src="options.js"></script>
+</body>
+</html>

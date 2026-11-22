@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daily Dapper</title>
+  <link rel="stylesheet" href="app.css">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Dapper">
+  <meta name="theme-color" content="#1f3a68">
+  <link rel="icon" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.png">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Daily Dapper</h1>
+      <div class="sub" id="todayLbl"></div>
+    </div>
+    <div class="hdr-right">
+      <div class="streak" id="streak"></div>
+      <div class="sync"><span id="sync"></span> · <a href="options.html" id="settingsLink">Settings</a></div>
+    </div>
+  </header>
+
+  <form class="search ext-only full-only" id="search">
+    <input type="search" name="q" placeholder="Search the web" aria-label="Search the web" autocomplete="off">
+  </form>
+
+  <div class="grid2">
+    <div class="card" id="dayCard"></div>
+    <div class="card full-only">
+      <div class="weeknav">
+        <button class="ghost" id="prevW" aria-label="Previous week">‹ Prev</button>
+        <span class="lbl" id="weekLbl"></span>
+        <button class="ghost" id="nextW" aria-label="Next week">Next ›</button>
+      </div>
+      <div class="scroll"><table class="matrix" id="matrix"></table></div>
+      <div class="legend">
+        <span><i class="cell sched"></i>Scheduled</span>
+        <span><i class="cell opt"></i>Optional</span>
+        <span><i class="cell done">✓</i>Done</span>
+        <span>✅ full day · 🌙 grace day · ✗ missed</span>
+        <span>Click a day name to open it on the left</span>
+      </div>
+    </div>
+  </div>
+
+  <a class="popup-only" href="index.html" id="openFull" target="_blank">Open the full page ↗</a>
+
+  <section class="full-only">
+    <div class="sechead">
+      <h2>Products</h2>
+      <button id="addProd">+ Add product</button>
+    </div>
+    <div class="prods" id="prods"></div>
+  </section>
+
+  <section class="full-only">
+    <div class="card">
+      <h2>Hair-wash days</h2>
+      <p class="note" style="margin-top:0">Hair and beard products show up on these days. If you wash on another day, use "I washed my hair today" on that day.</p>
+      <div class="dtoggles" id="washDays"></div>
+    </div>
+  </section>
+</div>
+<script src="web-shim.js"></script>
+<script src="shared.js"></script>
+<script src="github.js"></script>
+<script src="store.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
