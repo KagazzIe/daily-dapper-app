@@ -131,7 +131,14 @@ section { margin-bottom: 26px; }
 /* where things show */
 .web-app .ext-only { display: none !important; }
 html:not(.web-app) .web-only { display: none !important; }
-.popup-only { display: none; }
+.popup-only, .quiet-only { display: none; }
+
+/* new tab page with nothing due: search, the streak and a link to the routine */
+html.quiet .grid2, html.quiet section { display: none !important; }
+html.quiet .quiet-only { display: flex; }
+html.quiet .wrap { max-width: 640px; padding-top: 18vh; }
+#quietCard { justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.quietmsg { color: var(--muted); }
 
 /* toolbar popup: just today */
 html.popup body { width: 380px; }

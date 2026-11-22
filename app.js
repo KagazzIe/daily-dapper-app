@@ -8,6 +8,10 @@ if (!VIEW && !window.IS_WEB_APP) document.title = "New Tab";
 
 let R = null; // routine doc
 let C = null; // checks doc
+let S = { ...SETTINGS_DEFAULTS }; // settings doc (reminder times)
+// The new tab page shows the whole routine only when something is due; otherwise just a link to it.
+const IS_NEWTAB = !VIEW && !window.IS_WEB_APP;
+let quiet = null; // null until decided on the first render
 let today = todayKey();
 let selDate = today;
 let weekStart = mondayOf(parseKey(today));
@@ -28,14 +32,58 @@ function render() {
     today = now;
     weekStart = mondayOf(parseKey(today));
   }
+  updateQuiet();
   $("todayLbl").textContent = fmt(parseKey(today), { weekday: "long", month: "long", day: "numeric" });
   const streak = computeStreak(R, C, today);
   renderStreak(streak);
+  renderQuiet();
   renderDay();
   renderWeek(streak);
   if (!editing) renderProds();
   renderWash();
   syncStatusText().then((t) => ($("sync").textContent = t));
+}
+
+// Minutes since the routine day began (4am), so times after midnight sort after the evening.
+const dayMinutes = (hhmm) => {
+  const [h, m] = hhmm.split(":").map(Number);
+  return (((h - DAY_START_HOUR) % 24) + 24) % 24 * 60 + m;
+};
+const nowDayMinutes = () => dayMinutes(`${new Date().getHours()}:${new Date().getMinutes()}`);
+const clock = (hhmm) => {
+  const [h, m] = hhmm.split(":").map(Number);
+  return new Date(2000, 0, 1, h, m).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+};
+
+// Required steps left today that are due now: morning steps any time, evening and after-wash steps from the
+// evening reminder time on.
+function dueNow() {
+  const st = dayStatus(R, dayChecks(today), today);
+  const eveningStarted = nowDayMinutes() >= dayMinutes(S.pmTime);
+  return { st, due: st.left.filter((x) => x.slot === "AM" || eveningStarted) };
+}
+
+// Decided when the page opens. Afterwards it only switches to the full routine (when the evening comes round),
+// never away from it, so ticking off the last step here doesn't make the list vanish.
+function updateQuiet() {
+  if (!IS_NEWTAB) return;
+  const { due } = dueNow();
+  const next = quiet === null ? !due.length : quiet && !due.length;
+  if (next === quiet) return;
+  quiet = next;
+  document.documentElement.classList.toggle("quiet", quiet);
+}
+
+function renderQuiet() {
+  if (!quiet) return;
+  const { st } = dueNow();
+  const later = st.left.filter((x) => x.slot !== "AM");
+  let msg;
+  if (st.complete) msg = "✅ All done for today. Looking sharp.";
+  else if (!st.required.length) msg = "Nothing on the routine today.";
+  else msg = `✅ Nothing due right now. Evening routine at ${esc(clock(S.pmTime))}: ${plural(later.length, "step")}.`;
+  $("quietCard").innerHTML = `<div class="quietmsg">${msg}</div>
+    <a class="btn" href="app.html?view=full" id="showFull">Open Daily Dapper</a>`;
 }
 
 function renderStreak(s) {
@@ -268,13 +316,13 @@ function toast(msg, undo) {
 // ---------- Load and stay current ----------
 
 async function load() {
-  [R, C] = await Promise.all([getDoc("routine"), getDoc("checks")]);
+  [R, C, S] = await Promise.all([getDoc("routine"), getDoc("checks"), getSettings()]);
   render();
 }
 
 browser.storage.onChanged.addListener((changes, area) => {
   if (area !== "local") return;
-  if ("doc:routine" in changes || "doc:checks" in changes) load();
+  if ("doc:routine" in changes || "doc:checks" in changes || "doc:settings" in changes) load();
   else if (Object.keys(changes).some((k) => k.startsWith("sync:"))) syncStatusText().then((t) => ($("sync").textContent = t));
 });
 
@@ -294,4 +342,4 @@ load().then(() => {
     browser.runtime.sendMessage({ type: "sync" }).catch(() => {});
   }
 });
-setInterval(render, 5 * 60 * 1000); // keeps "today" right across the 4am rollover
+setInterval(render, 60 * 1000); // keeps "today" right across the 4am rollover, and brings up the evening routine
