@@ -44,11 +44,6 @@ a.btn.alt { background: var(--accent-soft); color: var(--accent); }
 .t-WASH { background: color-mix(in srgb, var(--wash) 16%, transparent); color: var(--wash); }
 .t-opt { background: var(--line); color: var(--muted); }
 
-/* search (new tab) */
-.search { margin-bottom: 18px; }
-.search input { width: 100%; font: inherit; font-size: 16px; padding: 11px 16px; border-radius: 99px; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
-.search input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
-
 /* day card */
 .dayhead { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; }
 .progress { font-size: 13px; color: var(--muted); }
@@ -131,14 +126,7 @@ section { margin-bottom: 26px; }
 /* where things show */
 .web-app .ext-only { display: none !important; }
 html:not(.web-app) .web-only { display: none !important; }
-.popup-only, .quiet-only { display: none; }
-
-/* new tab page with nothing due: search, the streak and a link to the routine */
-html.quiet .grid2, html.quiet section { display: none !important; }
-html.quiet .quiet-only { display: flex; }
-html.quiet .wrap { max-width: 640px; padding-top: 18vh; }
-#quietCard { justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-.quietmsg { color: var(--muted); }
+.popup-only { display: none; }
 
 /* toolbar popup: just today */
 html.popup body { width: 380px; }
