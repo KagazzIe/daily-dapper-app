@@ -11,6 +11,7 @@ let today = todayKey();
 let selDate = today;
 let weekStart = mondayOf(parseKey(today));
 let editing = null;
+let washDraft = null; // { wk, days } while changing a week's wash days; wk "default" for the default days
 
 const fmt = (d, o) => d.toLocaleDateString(undefined, o || { month: "short", day: "numeric" });
 const dayChecks = (ds) => C.checks[ds];
@@ -34,6 +35,7 @@ function render() {
   renderWeek(streak);
   if (!editing) renderProds();
   renderWash();
+  renderWashWeek();
   syncStatusText().then((t) => ($("sync").textContent = t));
 }
 
@@ -72,7 +74,7 @@ function renderDay() {
     h += st.steps[s].map((x) => stepHtml(selDate, x)).join("");
     h += "</div>";
   }
-  if (!R.washDays.includes(dow(d))) {
+  if (!washDaysFor(R, selDate).includes(dow(d))) {
     h += `<button class="washbtn" data-wash="${selDate}">${c._wash ? "Undo: I didn't wash my hair" : "🚿 I washed my hair today"}</button>`;
   }
   if (selDate !== today) h += ` <button class="ghost backtoday" data-sel="${today}">Back to today</button>`;
@@ -147,8 +149,43 @@ function editorHtml(p) {
   </form>`;
 }
 
+const sameDays = (a, b) => [...a].sort().join() === [...b].sort().join();
+
+// A day picker with the 3-a-week check and Save / Cancel. wk is a Monday's date key, or "default".
+function washPickerHtml(wk, saved, prevDays, nextDays, extra = "") {
+  const days = washDraft?.wk === wk ? washDraft.days : saved;
+  const changed = !sameDays(days, saved);
+  const chk = washCheck(days, prevDays, nextDays);
+  const msg = chk.error || chk.warning || `${WASHES_PER_WEEK} days with a day between each ✓`;
+  let h = `<div class="dtoggles">${DAYS.map((d, i) => `<button type="button" class="${days.includes(i) ? "on" : ""}" data-wpick="${wk}|${i}">${d}</button>`).join("")}</div>
+    <div class="row wrow"><span class="wstatus ${chk.error ? "err" : chk.warning ? "warn" : ""}">${esc(msg)}</span>`;
+  if (changed) h += `<button class="primary" data-wsave="${wk}" ${chk.error ? "disabled" : ""}>Save</button><button class="ghost" data-wcancel>Cancel</button>`;
+  else h += extra;
+  return h + "</div>";
+}
+
 function renderWash() {
-  $("washDays").innerHTML = DAYS.map((d, i) => `<button type="button" class="${R.washDays.includes(i) ? "on" : ""}" data-wday="${i}">${d}</button>`).join("");
+  $("washDays").innerHTML = washPickerHtml("default", R.washDays, R.washDays, R.washDays);
+}
+
+function renderWashWeek() {
+  const wk = dateKey(weekStart);
+  const own = R.washWeeks?.[wk];
+  const around = (n) => washDaysFor(R, dateKey(addDays(weekStart, n)));
+  $("washWeek").innerHTML = `<div class="washhead"><b>🚿 Hair wash this week</b><span class="hint">${own ? "changed for this week" : "default days"}</span></div>` +
+    washPickerHtml(wk, own || R.washDays, around(-7), around(7), own ? `<button class="ghost" data-wreset="${wk}">Back to default</button>` : "");
+}
+
+function saveWash(wk, days) {
+  days = [...days].sort((a, b) => a - b);
+  washDraft = null;
+  saveRoutine((r) => {
+    if (wk === "default") return { ...r, washDays: days };
+    const ww = { ...(r.washWeeks || {}) };
+    if (sameDays(days, r.washDays)) delete ww[wk];
+    else ww[wk] = days;
+    return { ...r, washWeeks: ww };
+  });
 }
 
 // ---------- Actions ----------
@@ -173,9 +210,21 @@ document.addEventListener("click", (e) => {
   } else if ((t = e.target.closest("[data-wash]"))) {
     const ds = t.dataset.wash;
     setCheck(ds, "_wash", !dayChecks(ds)?._wash);
-  } else if ((t = e.target.closest("[data-wday]"))) {
-    const i = +t.dataset.wday;
-    saveRoutine((r) => ({ ...r, washDays: r.washDays.includes(i) ? r.washDays.filter((x) => x !== i) : [...r.washDays, i].sort() }));
+  } else if ((t = e.target.closest("[data-wpick]"))) {
+    const [wk, i] = [t.dataset.wpick.split("|")[0], +t.dataset.wpick.split("|")[1]];
+    const saved = wk === "default" ? R.washDays : washDaysFor(R, wk);
+    const days = washDraft?.wk === wk ? washDraft.days : [...saved];
+    washDraft = { wk, days: days.includes(i) ? days.filter((x) => x !== i) : [...days, i] };
+    renderWash();
+    renderWashWeek();
+  } else if ((t = e.target.closest("[data-wsave]"))) {
+    if (washDraft?.wk === t.dataset.wsave) saveWash(washDraft.wk, washDraft.days);
+  } else if ((t = e.target.closest("[data-wcancel]"))) {
+    washDraft = null;
+    renderWash();
+    renderWashWeek();
+  } else if ((t = e.target.closest("[data-wreset]"))) {
+    saveWash(t.dataset.wreset, R.washDays);
   } else if ((t = e.target.closest("[data-edit]"))) {
     editing = editing === t.dataset.edit ? null : t.dataset.edit;
     renderProds();
@@ -190,6 +239,7 @@ document.addEventListener("click", (e) => {
     toast(`Deleted ${p.name}.`, () => saveRoutine((r) => ({ ...r, products: [...r.products.slice(0, i), p, ...r.products.slice(i)] })));
   } else if (e.target.id === "prevW" || e.target.id === "nextW") {
     weekStart = addDays(weekStart, e.target.id === "prevW" ? -7 : 7);
+    if (washDraft?.wk !== "default") washDraft = null;
     render();
   } else if (e.target.id === "addProd") {
     const p = { id: uid(), name: "New product", slots: ["PM"], days: [], optDays: [], step: 5, links: [], note: "" };

@@ -52,7 +52,8 @@ function defaultRoutine() {
   return {
     v: 1,
     startDate: todayKey(), // the streak counts from here
-    washDays: [0, 2, 4],
+    washDays: [0, 2, 4], // the default hair-wash days
+    washWeeks: {}, // "<Monday's date>": [days], for a week planned differently from the default
     products: [
       P("toner", "Hydrating toner", ["AM", "PM"], all, 2, [amz("B0CSDWS3HJ")], "First step after cleansing, morning and night."),
       P("vitc", "Vitamin C serum", ["AM"], all, 3, [amz("B07PNCCLD2")], "Mornings only. Let it absorb before sunscreen."),
@@ -70,10 +71,31 @@ function defaultRoutine() {
 
 const checkKey = (p, slot) => `${p.id}:${slot}`;
 
+// Hair washes: 3 a week with at least a day between them.
+const WASHES_PER_WEEK = 3;
+
+// The hair-wash weekdays for the week holding ds: that week's own plan if it has one, else the default.
+function washDaysFor(routine, ds) {
+  return routine.washWeeks?.[dateKey(mondayOf(parseKey(ds)))] || routine.washDays;
+}
+
+// Checks a week's wash days against the rule. Returns { error } (can't be saved), { warning } (can) or {}.
+// prevDays/nextDays are the weeks around it, for a Sunday wash followed by a Monday one.
+function washCheck(days, prevDays = [], nextDays = []) {
+  if (days.length !== WASHES_PER_WEEK) return { error: `Pick ${WASHES_PER_WEEK} days (${days.length} picked).` };
+  const s = [...days].sort((a, b) => a - b);
+  for (let i = 1; i < s.length; i++) {
+    if (s[i] - s[i - 1] < 2) return { error: `${DAYS[s[i - 1]]} and ${DAYS[s[i]]} are back to back. Leave a day between washes.` };
+  }
+  if (s[0] === 0 && prevDays.includes(6)) return { warning: "Monday comes right after the Sunday wash the week before." };
+  if (s[s.length - 1] === 6 && nextDays.includes(0)) return { warning: "Sunday comes right before the Monday wash the week after." };
+  return {};
+}
+
 // "req", "opt" or null. dayChecks is that day's check map (for the "_wash" flag).
 function slotKind(routine, dayChecks, p, slot, ds) {
   const d = dow(parseKey(ds));
-  if (slot === "WASH") return routine.washDays.includes(d) || dayChecks?._wash ? "req" : null;
+  if (slot === "WASH") return washDaysFor(routine, ds).includes(d) || dayChecks?._wash ? "req" : null;
   if (p.days.includes(d)) return "req";
   if ((p.optDays || []).includes(d)) return "opt";
   return null;
