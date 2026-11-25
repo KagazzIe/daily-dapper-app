@@ -1,7 +1,7 @@
 :root {
   --bg: #f1f3f7; --card: #ffffff; --ink: #1a2133; --muted: #636b7d; --line: #dde1ea;
   --accent: #1f3a68; --accent-soft: #e4eaf5; --on-accent: #ffffff; --warn: #a87b2f; --warn-soft: #f7efdd;
-  --bad: #b4483a; --am: #b07a1c; --pm: #7a4a8c; --wash: #2a7f8a;
+  --bad: #b4483a; --am: #b07a1c; --pm: #7a4a8c; --any: #c4621a; --wash: #2a7f8a;
   --radius: 14px;
   color-scheme: light dark;
 }
@@ -9,7 +9,7 @@
   :root {
     --bg: #0f131b; --card: #171d29; --ink: #e6e9f0; --muted: #959cad; --line: #2a3242;
     --accent: #d4b26a; --accent-soft: #2e2818; --on-accent: #161106; --warn: #e3b260; --warn-soft: #3a2f1b;
-    --bad: #ec8b7d; --am: #e0b060; --pm: #c49ad6; --wash: #6cc4cf;
+    --bad: #ec8b7d; --am: #e0b060; --pm: #c49ad6; --any: #f29a4a; --wash: #6cc4cf;
   }
 }
 * { box-sizing: border-box; }
@@ -40,7 +40,7 @@ a.btn { display: inline-block; text-decoration: none; font-weight: 500; border-r
 a.btn.alt { background: var(--accent-soft); color: var(--accent); }
 .tag { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; padding: 2px 7px; border-radius: 99px; }
 .t-AM { background: color-mix(in srgb, var(--am) 16%, transparent); color: var(--am); }
-.t-ANY { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
+.t-ANY { background: color-mix(in srgb, var(--any) 16%, transparent); color: var(--any); }
 .t-PM { background: color-mix(in srgb, var(--pm) 16%, transparent); color: var(--pm); }
 .t-WASH { background: color-mix(in srgb, var(--wash) 16%, transparent); color: var(--wash); }
 .t-opt { background: var(--line); color: var(--muted); }
