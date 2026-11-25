@@ -2,8 +2,10 @@
 // Dates, the routine's defaults, schedule logic and the streak.
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const SLOTS = { AM: "Morning", PM: "Evening", WASH: "After washing" };
-const SLOT_ORDER = ["AM", "PM", "WASH"];
+// ANY: once a day, morning or evening, whichever suits.
+const SLOTS = { AM: "Morning", ANY: "Morning or evening", PM: "Evening", WASH: "After washing" };
+const SLOT_ORDER = ["AM", "ANY", "PM", "WASH"];
+const SLOT_TAGS = { AM: "AM", ANY: "AM/PM", PM: "PM", WASH: "Wash" };
 
 // The routine day rolls over at 4am local time, so a late PM routine still counts for the day before.
 const DAY_START_HOUR = 4;
@@ -102,7 +104,7 @@ function slotKind(routine, dayChecks, p, slot, ds) {
 }
 
 function stepsFor(routine, dayChecks, ds) {
-  const out = { AM: [], PM: [], WASH: [] };
+  const out = { AM: [], ANY: [], PM: [], WASH: [] };
   for (const p of routine.products) {
     for (const s of p.slots) {
       const kind = slotKind(routine, dayChecks, p, s, ds);

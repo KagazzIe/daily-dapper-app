@@ -70,7 +70,7 @@ function renderDay() {
   if (st.complete) h += `<div class="alldone">✅ All done${selDate === today ? " for today. Looking sharp." : "."}</div>`;
   for (const s of SLOT_ORDER) {
     if (!st.steps[s].length) continue;
-    h += `<div class="slot"><h3><span class="tag t-${s}">${s === "WASH" ? "Wash" : s}</span>${SLOTS[s]}</h3>`;
+    h += `<div class="slot"><h3><span class="tag t-${s}">${SLOT_TAGS[s]}</span>${SLOTS[s]}</h3>`;
     h += st.steps[s].map((x) => stepHtml(selDate, x)).join("");
     h += "</div>";
   }
@@ -93,7 +93,7 @@ function renderWeek(streak) {
     `<th class="dh ${ds === selDate ? "sel" : ""} ${ds === today ? "today" : ""}" data-sel="${ds}">${DAYS[i]}<b>${parseKey(ds).getDate()}</b><i>${mark[streak.days[ds]] || ""}</i></th>`
   ).join("") + "</tr>";
   for (const { p, s } of rows) {
-    h += `<tr><td class="rl" title="${esc(p.name)}"><span class="tag t-${s}">${s === "WASH" ? "Wash" : s}</span>${esc(p.name)}</td>`;
+    h += `<tr><td class="rl" title="${esc(p.name)}"><span class="tag t-${s}">${SLOT_TAGS[s]}</span>${esc(p.name)}</td>`;
     for (const ds of days) {
       const k = slotKind(R, dayChecks(ds), p, s, ds);
       const dn = !!dayChecks(ds)?.[checkKey(p, s)];
@@ -116,7 +116,7 @@ function whenText(p) {
     if (s === "WASH") return "After washing";
     const dd = p.days.length === 7 ? "daily" : p.days.length ? p.days.map((i) => DAYS[i]).join(", ") : "no days set";
     const od = (p.optDays || []).length ? ` (+ ${p.optDays.map((i) => DAYS[i]).join(", ")} optional)` : "";
-    return `${s} ${dd}${od}`;
+    return `${s === "ANY" ? "AM or PM" : s} ${dd}${od}`;
   }).join(" · ");
 }
 
@@ -139,6 +139,7 @@ function editorHtml(p) {
     <div class="row">
       <label class="chk"><input type="checkbox" name="sAM" ${p.slots.includes("AM") ? "checked" : ""}> Morning</label>
       <label class="chk"><input type="checkbox" name="sPM" ${p.slots.includes("PM") ? "checked" : ""}> Evening</label>
+      <label class="chk"><input type="checkbox" name="sANY" ${p.slots.includes("ANY") ? "checked" : ""}> Morning or evening (either one)</label>
       <label class="chk"><input type="checkbox" name="sWASH" ${p.slots.includes("WASH") ? "checked" : ""}> After washing</label>
     </div>
     <div class="lbl2">Morning/evening days ${dayToggles(p.days, "eday")}</div>
@@ -268,7 +269,8 @@ document.addEventListener("submit", (e) => {
   if (!f) return;
   e.preventDefault();
   const id = f.dataset.form;
-  const slots = SLOT_ORDER.filter((s) => f.elements["s" + s].checked);
+  let slots = SLOT_ORDER.filter((s) => f.elements["s" + s].checked);
+  if (slots.includes("ANY")) slots = slots.filter((s) => s !== "AM" && s !== "PM"); // "either one" replaces both
   const days = [...f.querySelectorAll("[data-eday].on")].map((b) => +b.dataset.eday);
   const edits = {
     name: f.elements.pname.value.trim() || "Untitled",

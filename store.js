@@ -23,7 +23,7 @@ edit them by hand only if you know what you're changing.
 
 | File | Contents |
 |---|---|
-| \`routine.json\` | Products, which days and slots (AM / PM / after washing) they belong to, reorder links, hair-wash days |
+| \`routine.json\` | Products, which days and slots (AM / PM / either / after washing) they belong to, reorder links, hair-wash days |
 | \`checks.json\` | What was checked off each day. \`_wash\` marks an extra hair-wash day; \`_done\` marks a complete day (the streak counts these) |
 | \`settings.json\` | Reminder times |
 `;

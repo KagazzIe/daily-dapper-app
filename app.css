@@ -40,6 +40,7 @@ a.btn { display: inline-block; text-decoration: none; font-weight: 500; border-r
 a.btn.alt { background: var(--accent-soft); color: var(--accent); }
 .tag { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; padding: 2px 7px; border-radius: 99px; }
 .t-AM { background: color-mix(in srgb, var(--am) 16%, transparent); color: var(--am); }
+.t-ANY { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
 .t-PM { background: color-mix(in srgb, var(--pm) 16%, transparent); color: var(--pm); }
 .t-WASH { background: color-mix(in srgb, var(--wash) 16%, transparent); color: var(--wash); }
 .t-opt { background: var(--line); color: var(--muted); }
